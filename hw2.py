@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import os
 import sys
+import math
 
 
 def pause():
@@ -58,13 +59,31 @@ def create_tf(documents, query):
 def create_tfidf(documents, query):
     tfidf_rep = []
 
+    sum_doc = len(documents)
+    query_count = []
     for q in query:
+        nbr_q_in_docs = sum(doc.count(q) for doc in documents)
+        query_count.append(nbr_q_in_docs)
+
+    log_query_score = []
+    for q in query_count:
+        if q == 0:
+            log_query_score.append(0)
+        else:
+            log_query_score.append(math.log(q/sum_doc))
 
 
+    tf = create_tf(documents, query)
+
+    tfidf_score = []
+    for doc_s in tf: # For every score in tf, multiply it with the corresponding log_q_s
+        new_doc_s = []
+        for i, q_s in enumerate(doc_s):
+            new_doc_s.append(q_s * log_query_score[i])
+
+        tfidf_score.append(new_doc_s)
 
     return tfidf_rep
-
-
 
 
 ################## START #######################
@@ -76,8 +95,10 @@ query_path = 'cranfield/q'
 queries = read_files(query_path)
 
 # bool_rep = create_bool_rep(documents, queries[0]) # One query, many documents
-# tf_rep = create_tf(documents, queries[0])
+tf_rep = create_tf(documents, queries[0])
 tfidf_rep = create_tfidf(documents, queries[0])
+
+print(tf_rep)
 
 # tfidf_vectorizer = TfidfVectorizer()
 # tfidf_matrix = tfidf_vectorizer.fit_transform(documents)
