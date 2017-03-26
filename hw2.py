@@ -114,9 +114,3 @@ euc_distances = []
 for i, d_outer in enumerate(bool_rep):
     for d_inner in bool_rep:
         euc_distances.append(comp_euc_dist(bool_rep[i], d_inner))
-
-
-
-
-
-
