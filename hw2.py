@@ -4,6 +4,7 @@ import numpy as np
 import os
 import sys
 import math
+from scipy.spatial import distance
 
 
 def pause():
@@ -85,6 +86,8 @@ def create_tfidf(documents, query):
 
     return tfidf_rep
 
+def comp_euc_dist(v1, v2):
+    return distance.euclidean(v1, v2)
 
 ################## START #######################
 
@@ -94,43 +97,25 @@ documents = read_files(doc_path)
 query_path = 'cranfield/q'
 queries = read_files(query_path)
 
-# bool_rep = create_bool_rep(documents, queries[0]) # One query, many documents
-tf_rep = create_tf(documents, queries[0])
-tfidf_rep = create_tfidf(documents, queries[0])
+bool_reps = []
+for q in queries:
+    bool_reps.append(create_bool_rep(documents, q))
 
-print(tf_rep)
+tf_reps = []
+for q in queries:
+    tf_reps.append(create_tf(documents, q))
 
-# tfidf_vectorizer = TfidfVectorizer()
-# tfidf_matrix = tfidf_vectorizer.fit_transform(documents)
-# print(tfidf_matrix)
-sys.exit(1)
+tfidf_reps = []
+for q in queries:
+    tfidf_reps.append(create_tfidf(documents, q))
+
+bool_rep = bool_reps[0]
+euc_distances = []
+for i, d_outer in enumerate(bool_rep):
+    for d_inner in bool_rep:
+        euc_distances.append(comp_euc_dist(bool_rep[i], d_inner))
 
 
-# print(documents[0])
-# print(queries[0])
-# sys.exit(1)
-
-
-# prepare corpus
-corpus = []
-for d in range(1400):
-    f = open("cranfield/d/"+str(d+1)+".txt")
-    corpus.append(f.read())
-# add query to corpus
-for q in [1]:
-    f = open("cranfield/q/"+str(q)+".txt")
-    corpus.append(f.read())
-
-# init vectorizer
-tfidf_vectorizer = TfidfVectorizer()
-
-# prepare matrix
-tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
-
-# compute similarity between query and all docs (tf-idf) and get top 10 relevant
-sim = np.array(cosine_similarity(tfidf_matrix[len(corpus)-1], tfidf_matrix[0:(len(corpus)-1)])[0])
-topRelevant = sim.argsort()[-10:][::-1]+1
-print(topRelevant)
 
 
 
